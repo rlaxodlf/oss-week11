@@ -8,7 +8,21 @@
 
 import { readFile } from "node:fs/promises";
 
-// P5: 여기에 getDaily 를 씁니다.
+const BASE = "https://api.open-meteo.com/v1/forecast";
+
+export async function getDaily({ lat, lon }) {
+  const params = new URLSearchParams({
+    latitude: lat,
+    longitude: lon,
+    daily: "temperature_2m_max,precipitation_probability_max,wind_speed_10m_max",
+    timezone: "Asia/Seoul",
+    forecast_days: 7,
+  });
+  const res = await fetch(`${BASE}?${params}`);
+  if (!res.ok) throw new Error(`Open-Meteo: HTTP ${res.status}`);
+  const data = await res.json();
+  return data.daily;
+}
 
 // ---- 주어짐: Open-Meteo 가 응답하지 않을 때만 씁니다 (README 부록 E19) ----
 // data/ 폴더에 저장해 둔 실제 응답(11/5 받은 것)에서 daily 를 돌려줍니다. getDaily 와 돌려주는 모양이 같습니다.
