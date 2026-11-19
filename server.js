@@ -21,6 +21,13 @@ const CITIES = {
   gangneung: { name: "Gangneung", lat: 37.7519, lon: 128.8761 },
 };
 
+if (!process.env.ADMIN_TOKEN) {
+  console.error("ADMIN_TOKEN is not set. Copy .env.example to .env.");
+  process.exit(1);
+}
+
+const counts = {};
+
 const PORT = process.env.PORT ?? 3000;
 const app = express();
 
@@ -35,6 +42,7 @@ app.get("/api/forecast", async (req, res) => {
   if (typeof key !== "string" || !Object.hasOwn(CITIES, key)) {
     return res.status(400).json({ error: `Unknown city: ${key}` });
   }
+  counts[key] = (counts[key] ?? 0) + 1;
   const city = CITIES[key];
   try {
     const daily = await getDaily(city);
@@ -42,6 +50,13 @@ app.get("/api/forecast", async (req, res) => {
   } catch (err) {
     res.status(502).json({ error: err.message });
   }
+});
+
+app.get("/api/stats", (req, res) => {
+  if (req.get("Authorization") !== `Bearer ${process.env.ADMIN_TOKEN}`) {
+    return res.status(401).json({ error: "Unauthorized" });
+  }
+  res.json(counts);
 });
 
 const server = app.listen(PORT, (error) => {
