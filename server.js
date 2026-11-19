@@ -11,3 +11,22 @@
 // 이 파일은 public/ 밖에 있습니다. 브라우저 주소창으로는 열리지 않습니다(P4 에서 확인).
 
 // P4 부터 여기 아래에 씁니다.
+import express from "express";
+
+const PORT = process.env.PORT ?? 3000;
+const app = express();
+
+app.use(express.static("public"));
+
+app.get("/api/health", (req, res) => {
+  res.json({ status: "ok" });
+});
+
+const server = app.listen(PORT, (error) => {
+  if (error) throw error;
+  console.log(`Listening on http://localhost:${PORT}`);
+});
+
+server.on("error", (error) => {
+  throw error;
+});
